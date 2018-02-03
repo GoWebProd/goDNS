@@ -1,0 +1,35 @@
+stages:
+  - build
+  - image
+
+build_project:
+  image: golang:1.9.2-alpine3.7
+  stage: build
+  script:
+    - apk --no-cache add build-base git
+    - go get github.com/constabulary/gb/...
+    - ln -s /builds /go/src/gitlab.com
+    - cd /go/src/gitlab.com/${CI_PROJECT_PATH}
+    - GOOS=linux GOARCH=amd64 CGO=0 gb build
+    - mv bin/server-linux-amd64 bin/server
+  artifacts:
+    paths:
+      - bin/server
+  cache:
+    paths:
+      - bin/server
+
+build_docker_image:
+  image: docker:latest
+  stage: image
+  variables:
+    DOCKER_DRIVER: overlay2
+  services:
+    - docker:dind
+  script:
+    - cd /builds/${CI_PROJECT_PATH}
+    - cp /etc/ssl/certs/ca-certificates.crt ca-certificates.crt
+    - docker login https://${URL} -u ${LOGIN} -p ${PASSWORD}
+    - docker build -t ${URL}/goDNS:latest .
+    - docker push ${URL}/goDNS
+
