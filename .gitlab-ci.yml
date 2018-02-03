@@ -3,7 +3,7 @@ stages:
   - image
 
 build_project:
-  image: golang:1.9.2-alpine3.7
+  image: golang:latest
   stage: build
   script:
     - apk --no-cache add build-base git
@@ -20,12 +20,12 @@ build_project:
       - bin/server
 
 build_docker_image:
-  image: docker:latest
+  image: jonaskello/docker-and-compose:17.03.0-1.18.0
   stage: image
   variables:
     DOCKER_DRIVER: overlay2
   services:
-    - docker:dind
+    - docker:17.03.0-dind
   script:
     - cd /builds/${CI_PROJECT_PATH}
     - docker login https://${HUB_URL} -u ${HUB_LOGIN} -p ${HUB_PASSWORD}
