@@ -12,6 +12,7 @@ build_project:
     - cd /go/src/gitlab.com/${CI_PROJECT_PATH}
     - GOOS=linux GOARCH=amd64 CGO=0 gb build
     - mv bin/server-linux-amd64 bin/server
+    - chmod +x bin/server
   artifacts:
     paths:
       - bin/server
