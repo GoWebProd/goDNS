@@ -6,5 +6,4 @@ ADD ca-certificates.crt /etc/ssl/certs/
 
 EXPOSE 53/tcp 53/udp
 
-WORKDIR /dist/
 ENTRYPOINT ["/dist/bin/server", "-c", "/dist/etc/config.yaml"]
