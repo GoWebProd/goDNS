@@ -1,6 +1,6 @@
 nameservers:
-  - 8.8.8.8
-  - 8.8.4.4
+  - 8.8.8.8:53
+  - 8.8.4.4:53
 blocklist:
   - https://raw.githubusercontent.com/GoWebProd/openvpn-adBlock/master/list/black.list
 blockAddress4: 0.0.0.0
