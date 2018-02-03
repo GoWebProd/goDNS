@@ -9,7 +9,7 @@ build_project:
     - go get github.com/constabulary/gb/...
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/${CI_PROJECT_PATH}
-    - GOOS=linux GOARCH=amd64 CGO=0 gb build
+    - GOOS=linux GOARCH=amd64 CGO=0 gb build -ldflags '-w -s'
     - mv bin/server-linux-amd64 bin/server
   artifacts:
     paths:
