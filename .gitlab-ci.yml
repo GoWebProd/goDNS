@@ -28,7 +28,6 @@ build_docker_image:
     - docker:dind
   script:
     - cd /builds/${CI_PROJECT_PATH}
-    - cp /etc/ssl/certs/ca-certificates.crt ca-certificates.crt
     - docker login https://${HUB_URL} -u ${HUB_LOGIN} -p ${HUB_PASSWORD}
     - docker build -t ${HUB_URL}/godns:latest .
     - docker push ${HUB_URL}/godns
