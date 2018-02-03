@@ -1,4 +1,4 @@
-FROM scratch
+FROM acoshift/go-scratch
 
 ADD bin/server /dist/bin/server
 ADD etc /dist/etc

@@ -10,7 +10,7 @@ build_project:
     - go get github.com/constabulary/gb/...
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/${CI_PROJECT_PATH}
-    - GOOS=linux GOARCH=amd64 gb build
+    - GOOS=linux GOARCH=amd64 CGO=0 gb build -ldflags '-w -s'
     - mv bin/server-linux-amd64 bin/server
   artifacts:
     paths:
@@ -20,7 +20,7 @@ build_project:
       - bin/server
 
 build_docker_image:
-  image: centos:latest
+  image: docker:latest
   stage: image
   variables:
     DOCKER_DRIVER: overlay2
@@ -28,7 +28,7 @@ build_docker_image:
     - docker:dind
   script:
     - cd /builds/${CI_PROJECT_PATH}
-    - cp /etc/ssl/certs/ca-bundle.crt ca-certificates.crt
+    - cp /etc/ssl/certs/ca-certificates.crt ca-certificates.crt
     - docker login https://${HUB_URL} -u ${HUB_LOGIN} -p ${HUB_PASSWORD}
     - docker build -t ${HUB_URL}/godns:latest .
     - docker push ${HUB_URL}/godns
