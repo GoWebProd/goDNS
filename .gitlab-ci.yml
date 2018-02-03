@@ -6,7 +6,6 @@ build_project:
   image: golang:latest
   stage: build
   script:
-    - apt-get install gcc git
     - go get github.com/constabulary/gb/...
     - ln -s /builds /go/src/gitlab.com
     - cd /go/src/gitlab.com/${CI_PROJECT_PATH}

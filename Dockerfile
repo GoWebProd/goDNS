@@ -1,4 +1,4 @@
-FROM acoshift/go-scratch
+FROM alpine:latest
 
 ADD bin/server /server
 ADD etc/config.yaml /config.yaml
