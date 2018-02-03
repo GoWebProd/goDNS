@@ -29,7 +29,7 @@ build_docker_image:
   script:
     - cd /builds/${CI_PROJECT_PATH}
     - cp /etc/ssl/certs/ca-certificates.crt ca-certificates.crt
-    - docker login https://${URL} -u ${LOGIN} -p ${PASSWORD}
-    - docker build -t ${URL}/goDNS:latest .
-    - docker push ${URL}/goDNS
+    - docker login https://${HUB_URL} -u ${HUB_LOGIN} -p ${HUB_PASSWORD}
+    - docker build -t ${HUB_URL}/goDNS:latest .
+    - docker push ${HUB_URL}/goDNS
 
