@@ -9,14 +9,6 @@ import (
 	"time"
 )
 
-type RequestType uint8
-
-const (
-	RequestIPv4 RequestType = iota
-	RequestIPv6
-	RequestOther
-)
-
 func HandlerTCP(w dns.ResponseWriter, req *dns.Msg) {
 	totalRequestsTcp.Inc()
 	Handler(w, req)
@@ -32,16 +24,6 @@ func Handler(w dns.ResponseWriter, req *dns.Msg) {
 
 	question := req.Question[0]
 
-	var reqType RequestType
-	switch question.Qtype {
-	case dns.TypeA:
-		reqType = RequestIPv4
-	case dns.TypeAAAA:
-		reqType = RequestIPv6
-	default:
-		reqType = RequestOther
-	}
-
 	cachedReq := cache.Get(question.Qtype, question.Name)
 	if cachedReq != nil {
 		totalCacheHits.Inc()
@@ -55,31 +37,30 @@ func Handler(w dns.ResponseWriter, req *dns.Msg) {
 		return
 	}
 
-	if reqType != RequestOther && blackList.Contains(question.Name) {
+	if (question.Qtype == dns.TypeA || question.Qtype == dns.TypeAAAA) && blackList.Contains(question.Name) {
 		response := &dns.Msg{}
 		response.SetReply(req)
 
-		if reqType == RequestIPv4 {
-			response.Answer = append(response.Answer, &dns.A{
-				Hdr: dns.RR_Header{
-					Name:   question.Name,
-					Rrtype: dns.TypeA,
-					Class:  dns.ClassINET,
-					Ttl:    uint32(config.UpdateInterval.Seconds()),
-				},
-				A: net.ParseIP(config.BlockAddress4),
-			})
-		} else {
-			response.Answer = append(response.Answer, &dns.AAAA{
-				Hdr: dns.RR_Header{
-					Name:   question.Name,
-					Rrtype: dns.TypeAAAA,
-					Class:  dns.ClassINET,
-					Ttl:    uint32(config.UpdateInterval.Seconds()),
-				},
-				AAAA: net.ParseIP(config.BlockAddress6),
-			})
+		head := dns.RR_Header{
+			Name:   question.Name,
+			Rrtype: question.Qtype,
+			Class:  dns.ClassINET,
+			Ttl:    uint32(config.UpdateInterval.Seconds()),
 		}
+
+		var line dns.RR
+		if question.Qtype == dns.TypeA {
+			line = &dns.A{
+				Hdr: head,
+				A: net.ParseIP(config.BlockAddress4),
+			}
+		} else {
+			line = &dns.AAAA{
+				Hdr: head,
+				AAAA: net.ParseIP(config.BlockAddress6),
+			}
+		}
+		response.Answer = append(response.Answer, line)
 
 		w.WriteMsg(response)
 		log.Println("blocked", question.Name)
