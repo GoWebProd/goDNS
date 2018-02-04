@@ -12,6 +12,7 @@ import (
 var (
 	config    *Config
 	blackList *BlackList
+	cache     Cache
 
 	configFile = flag.String("c", "etc/config.yaml", "configuration file")
 )
@@ -71,6 +72,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	cache = NewMemoryCache()
 
 	blackList = UpdateList()
 	go listUpdater()

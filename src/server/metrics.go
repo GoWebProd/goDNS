@@ -51,6 +51,20 @@ var (
 		Name:      "success",
 		Help:      "success requests",
 	}))
+
+	totalRequestsToGoogle = prometheus.NewCounter(prometheus.CounterOpts(prometheus.Opts{
+		Namespace: "dns",
+		Subsystem: "requests",
+		Name:      "google",
+		Help:      "google requests",
+	}))
+
+	totalCacheHits = prometheus.NewCounter(prometheus.CounterOpts(prometheus.Opts{
+		Namespace: "dns",
+		Subsystem: "requests",
+		Name:      "cache",
+		Help:      "cached requests",
+	}))
 )
 
 func runPrometheus() {
@@ -59,6 +73,8 @@ func runPrometheus() {
 	prometheus.MustRegister(totalRequestsFailed)
 	prometheus.MustRegister(totalRequestsBlocked)
 	prometheus.MustRegister(totalRequestsSuccess)
+	prometheus.MustRegister(totalRequestsToGoogle)
+	prometheus.MustRegister(totalCacheHits)
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":9970", nil))

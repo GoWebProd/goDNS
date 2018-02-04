@@ -42,6 +42,19 @@ func Handler(w dns.ResponseWriter, req *dns.Msg) {
 		reqType = RequestOther
 	}
 
+	cachedReq := cache.Get(question.Qtype, question.Name)
+	if cachedReq != nil {
+		totalCacheHits.Inc()
+
+		response := &dns.Msg{}
+		response.SetReply(req)
+		response.Answer = append(response.Answer, cachedReq)
+
+		w.WriteMsg(response)
+		totalRequestsSuccess.Inc()
+		return
+	}
+
 	if reqType != RequestOther && blackList.Contains(question.Name) {
 		response := &dns.Msg{}
 		response.SetReply(req)
@@ -82,6 +95,9 @@ func Handler(w dns.ResponseWriter, req *dns.Msg) {
 		totalRequestsFailed.Inc()
 	} else {
 		totalRequestsSuccess.Inc()
+		if len(resp.Answer) > 0 {
+			cache.Set(question.Qtype, question.Name, resp.Answer[0])
+		}
 	}
 
 	w.WriteMsg(resp)
@@ -101,6 +117,7 @@ func Lookup(req *dns.Msg) (*dns.Msg, error) {
 	L := func(nameserver string) {
 		defer wg.Done()
 		r, _, err := c.Exchange(req, nameserver)
+		totalRequestsToGoogle.Inc()
 		if err != nil {
 			log.Printf("%s socket error on %s", qName, nameserver)
 			log.Printf("error:%s", err.Error())
